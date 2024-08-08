@@ -37,3 +37,16 @@ func (dc *DictController) PostEntry(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 }
+
+func (dc *DictController) UpdateEntry(w http.ResponseWriter, r *http.Request) {
+	var updatedEntry dict.DictEntry
+
+	err := json.NewDecoder(r.Body).Decode(&updatedEntry)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	dc.dictionary.UpdateEntry(&updatedEntry)
+
+	w.WriteHeader(http.StatusOK)
+}

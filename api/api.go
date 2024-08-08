@@ -20,6 +20,7 @@ func NewApi(address string) Api {
 
 	mux.HandleFunc("GET /entries", dictionaryController.GetEntries)
 	mux.HandleFunc("POST /entries", dictionaryController.PostEntry)
+	mux.HandleFunc("PATCH /entries", dictionaryController.UpdateEntry)
 
 	s := &http.Server{
 		Addr:           address,
