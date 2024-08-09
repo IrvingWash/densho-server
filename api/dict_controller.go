@@ -7,17 +7,24 @@ import (
 )
 
 type DictController struct {
-	dictionary *dict.Dict
+	dictService *DictService
 }
 
-func NewDictController(dictionary *dict.Dict) DictController {
-	return DictController{dictionary: dictionary}
+func NewDictController(dictionary *DictService) DictController {
+	return DictController{dictService: dictionary}
 }
 
 func (dc *DictController) GetEntries(w http.ResponseWriter, r *http.Request) {
-	j, err := json.Marshal(dc.dictionary.Entries())
+	entries, err := dc.dictService.Entries()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	j, err := json.Marshal(entries)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -31,27 +38,14 @@ func (dc *DictController) PostEntry(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&entry)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	dc.dictionary.AddEntry(&entry)
-
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (dc *DictController) UpdateEntry(w http.ResponseWriter, r *http.Request) {
-	var updatedEntry dict.DictEntry
-
-	err := json.NewDecoder(r.Body).Decode(&updatedEntry)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	err = dc.dictionary.UpdateEntry(&updatedEntry)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	err = dc.dictService.AddEntry(&entry)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

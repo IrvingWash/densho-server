@@ -1,7 +1,7 @@
 package api
 
 import (
-	"densho/dict"
+	"densho/db"
 	"log"
 	"net/http"
 	"time"
@@ -12,15 +12,16 @@ type Api struct {
 }
 
 func NewApi(address string) Api {
-	dictionary := dict.NewDict()
+	db := db.NewDb("./testdb")
 
-	dictionaryController := NewDictController(&dictionary)
+	dictService := NewDictService(&db)
+
+	dictionaryController := NewDictController(&dictService)
 
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /entries", dictionaryController.GetEntries)
 	mux.HandleFunc("POST /entries", dictionaryController.PostEntry)
-	mux.HandleFunc("PATCH /entries", dictionaryController.UpdateEntry)
 
 	s := &http.Server{
 		Addr:           address,

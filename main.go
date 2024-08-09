@@ -1,6 +1,8 @@
 package main
 
-import "densho/api"
+import (
+	"densho/api"
+)
 
 func main() {
 	api := api.NewApi(":3000")

@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"densho/dict"
 	"fmt"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var schemaSQL = `
 CREATE TABLE IF NOT EXISTS dictionary (
-	id NUMBER PRIMARY KEY
-	kanji STRING
-	kana STRING
-	translation STRING
+	id INTEGER PRIMARY KEY NOT NULL,
+	kanji STRING NOT NULL,
+	kana STRING NOT NULL,
+	translation STRING NOT NULL
 );
 `
 
@@ -21,6 +23,10 @@ INSERT into dictionary (
 ) VALUES (
 	?, ?, ?
 )
+`
+
+var listSQL = `
+SELECT * FROM dictionary
 `
 
 type Db struct {
@@ -48,6 +54,38 @@ func NewDb(dbFile string) Db {
 		sql:       sqlDb,
 		insertion: insertion,
 	}
+}
+
+func (db *Db) List() ([]dict.DictEntry, error) {
+	tx, err := db.sql.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(listSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []dict.DictEntry
+
+	for rows.Next() {
+		var entry dict.DictEntry
+
+		if err := rows.Scan(&entry.Id, &entry.Kanji, &entry.Kana, &entry.Translation); err != nil {
+			return nil, err
+		}
+
+		entries = append(entries, entry)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return entries, nil
 }
 
 func (db *Db) Insert(entry dict.DictEntryPayload) error {
