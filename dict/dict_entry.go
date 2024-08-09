@@ -1,14 +1,14 @@
 package dict
 
 type DictEntry struct {
-	Id          int
-	Kanji       string
-	Kana        string
-	Translation string
+	Id          int    `json:"id"`
+	Kanji       string `json:"kanji"`
+	Kana        string `json:"kana"`
+	Translation string `json:"translation"`
 }
 
 type DictEntryPayload struct {
-	Kanji       string
-	Kana        string
-	Translation string
+	Kanji       string `json:"kanji"`
+	Kana        string `json:"kana"`
+	Translation string `json:"translation"`
 }
