@@ -1,5 +1,7 @@
 package dict
 
+import "errors"
+
 type Dict struct {
 	entries []DictEntry
 }
@@ -36,7 +38,7 @@ func (d *Dict) RemoveEntry(id int) {
 	d.entries = filteredEntries
 }
 
-func (d *Dict) UpdateEntry(updatedEntry *DictEntry) {
+func (d *Dict) UpdateEntry(updatedEntry *DictEntry) error {
 	var entryToUpdateId = -1
 
 	for i, e := range d.entries {
@@ -45,5 +47,11 @@ func (d *Dict) UpdateEntry(updatedEntry *DictEntry) {
 		}
 	}
 
+	if entryToUpdateId == -1 {
+		return errors.New("entry to update not found")
+	}
+
 	d.entries[entryToUpdateId] = *updatedEntry
+
+	return nil
 }

@@ -46,7 +46,12 @@ func (dc *DictController) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	dc.dictionary.UpdateEntry(&updatedEntry)
+	err = dc.dictionary.UpdateEntry(&updatedEntry)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
