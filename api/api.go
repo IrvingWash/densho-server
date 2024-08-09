@@ -11,10 +11,8 @@ type Api struct {
 	server *http.Server
 }
 
-func NewApi(address string) Api {
-	db := db.NewDb("./testdb")
-
-	dictService := NewDictService(&db)
+func NewApi(address string, db *db.Db) Api {
+	dictService := NewDictService(db)
 
 	dictionaryController := NewDictController(&dictService)
 
@@ -22,6 +20,7 @@ func NewApi(address string) Api {
 
 	mux.HandleFunc("GET /entries", dictionaryController.GetEntries)
 	mux.HandleFunc("POST /entries", dictionaryController.PostEntry)
+	mux.HandleFunc("GET /entriess", dictionaryController.FindEntries)
 
 	s := &http.Server{
 		Addr:           address,

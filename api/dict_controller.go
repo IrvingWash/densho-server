@@ -32,6 +32,26 @@ func (dc *DictController) GetEntries(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+func (dc *DictController) FindEntries(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+
+	entries, err := dc.dictService.FindEntries(query.Get("query"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	j, err := json.Marshal(entries)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
+}
+
 func (dc *DictController) PostEntry(w http.ResponseWriter, r *http.Request) {
 	var entry dict.DictEntryPayload
 

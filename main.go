@@ -2,10 +2,15 @@ package main
 
 import (
 	"densho/api"
+	"densho/db"
 )
 
 func main() {
-	api := api.NewApi(":3000")
+	db := db.NewDb("./testdb")
+
+	api := api.NewApi(":3000", &db)
 
 	api.Start()
+
+	db.Close()
 }

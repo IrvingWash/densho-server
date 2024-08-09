@@ -11,9 +11,9 @@ import (
 var schemaSQL = `
 CREATE TABLE IF NOT EXISTS dictionary (
 	id INTEGER PRIMARY KEY NOT NULL,
-	kanji STRING NOT NULL,
-	kana STRING NOT NULL,
-	translation STRING NOT NULL
+	kanji TEXT NOT NULL,
+	kana TEXT NOT NULL,
+	translation TEXT NOT NULL
 );
 `
 
@@ -27,6 +27,11 @@ INSERT into dictionary (
 
 var listSQL = `
 SELECT * FROM dictionary
+`
+
+var findSQL = `
+SELECT * FROM dictionary
+WHERE kanji = ? OR kana = ? OR translation = ?
 `
 
 type Db struct {
@@ -73,7 +78,41 @@ func (db *Db) List() ([]dict.DictEntry, error) {
 	for rows.Next() {
 		var entry dict.DictEntry
 
-		if err := rows.Scan(&entry.Id, &entry.Kanji, &entry.Kana, &entry.Translation); err != nil {
+		err := rows.Scan(&entry.Id, &entry.Kanji, &entry.Kana, &entry.Translation)
+		if err != nil {
+			return nil, err
+		}
+
+		entries = append(entries, entry)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return entries, nil
+}
+
+func (db *Db) Find(query string) ([]dict.DictEntry, error) {
+	tx, err := db.sql.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(findSQL, query, query, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []dict.DictEntry
+
+	for rows.Next() {
+		var entry dict.DictEntry
+
+		err := rows.Scan(&entry.Id, &entry.Kanji, &entry.Kana, &entry.Translation)
+		if err != nil {
 			return nil, err
 		}
 
